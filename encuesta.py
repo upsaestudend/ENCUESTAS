@@ -1,22 +1,30 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 from streamlit_autorefresh import st_autorefresh
+
+# --- Configuración de página ---
+st.set_page_config(page_title="Resultados de la encuesta", page_icon="🗳️", layout="wide")
 
 # --- Refrescar cada 10 segundos automáticamente ---
 st_autorefresh(interval=10000, key="refresh")
 
-# --- Título y subtítulo ---
-st.title("Resultados de la encuesta (actualización automática cada 10s)")
-st.subheader("¿Si las elecciones de segunda vuelta fueran mañana, por quien votarías?")
+# --- Encabezado ---
+st.markdown("""
+    <h1 style='text-align: center; color: #2E86C1;'>Resultados de la encuesta</h1>
+    <h3 style='text-align: center; color: #34495E;'>¿Si las elecciones de segunda vuelta fueran mañana, por quien votarías?</h3>
+""", unsafe_allow_html=True)
 
-# --- URL del CSV ---
+# --- URL del CSV del Google Form ---
 url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1PL0i07Sl2mYrX3z3fxYwvjGw1za3ICLk09nlpqDDzgl-PffuC0NuT1_4xro8ADCQSrAUBlqdhHal/pub?output=csv"
 
-# --- Botón actualizar ---
+# --- Botón de actualización manual ---
+st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
 if st.button("🔄 Actualizar resultados"):
     df = pd.read_csv(url)
 else:
     df = pd.read_csv(url)
+st.markdown("</div>", unsafe_allow_html=True)
 
 # --- Columna de respuestas ---
 col_respuesta = df.columns[1]
@@ -28,32 +36,53 @@ conteo["Porcentaje"] = ((conteo["Cantidad"] / conteo["Cantidad"].sum()) * 100).r
 
 # --- Mostrar ganador ---
 ganador = conteo.iloc[0]["Respuesta"]
-st.markdown(f"**Gana el candidato {ganador}**")
+st.markdown(f"<h2 style='text-align: center; color: #E74C3C;'>Gana el candidato {ganador}</h2>", unsafe_allow_html=True)
 
-# --- Mostrar barras de progreso por candidato ---
-st.subheader("📊 Distribución de votos")
+# --- Layout: Tabla y gráfico lado a lado ---
+col1, col2 = st.columns([1, 2])
 
-for idx, row in conteo.iterrows():
-    nombre = row["Respuesta"]
-    porcentaje = row["Porcentaje"]
-    
-    # Definir gradiente por candidato
-    if nombre.lower() == "tuto":
-        color = "linear-gradient(to right, #E74C3C 0%, #3498DB 100%)"  # rojo a azul
-    elif nombre.lower() == "rodrigo":
-        color = "linear-gradient(to right, #E74C3C 0%, #ffffff 50%, #2ECC71 100%)"  # rojo blanco verde
-    else:
-        color = "#95A5A6"  # gris para otros
+with col1:
+    st.subheader("📌 Resultados por respuesta")
+    st.dataframe(conteo.style.background_gradient(cmap='Blues', subset=['Cantidad']))
 
-    # Barra de progreso HTML
-    st.markdown(f"""
-        <div style="margin-bottom: 10px;">
-            <strong>{nombre} ({porcentaje}%)</strong>
-            <div style="background-color: #e0e0e0; border-radius: 5px; width: 100%; height: 25px;">
-                <div style="width: {porcentaje}%; height: 25px; background: {color}; border-radius: 5px;"></div>
+    st.subheader("📊 Barras de progreso por candidato")
+    for idx, row in conteo.iterrows():
+        nombre = row["Respuesta"]
+        porcentaje = row["Porcentaje"]
+
+        # Colores por candidato
+        if nombre.lower() == "tuto":
+            color = "linear-gradient(to right, #E74C3C 0%, #3498DB 100%)"  # rojo → azul
+        elif nombre.lower() == "rodrigo":
+            color = "linear-gradient(to right, #E74C3C 0%, #ffffff 50%, #2ECC71 100%)"  # rojo → blanco → verde
+        else:
+            color = "#95A5A6"  # gris neutro
+
+        st.markdown(f"""
+            <div style="margin-bottom: 10px;">
+                <strong>{nombre} ({porcentaje}%)</strong>
+                <div style="background-color: #e0e0e0; border-radius: 5px; width: 100%; height: 25px;">
+                    <div style="width: {porcentaje}%; height: 25px; background: {color}; border-radius: 5px;"></div>
+                </div>
             </div>
-        </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
+
+with col2:
+    st.subheader("📊 Gráfico de barras")
+    fig, ax = plt.subplots(figsize=(8, 5))
+    bars = ax.bar(conteo["Respuesta"], conteo["Cantidad"], color="#3498DB", edgecolor="#1F618D")
+    ax.set_ylabel("Cantidad de votos")
+    ax.set_xlabel("Respuestas")
+    ax.set_title("Resultados de la encuesta")
+    plt.xticks(rotation=45)
+
+    # Mostrar valor de cada barra
+    for bar in bars:
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2., height + 0.5, f'{int(height)}', ha='center', va='bottom', fontsize=10)
+
+    st.pyplot(fig)
 
 # --- Última actualización ---
-st.caption(f"Última actualización: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}")
+st.markdown(f"<p style='text-align: center; color: gray;'>Última actualización: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}</p>", unsafe_allow_html=True)
+
