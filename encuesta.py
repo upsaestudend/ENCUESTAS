@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 from streamlit_autorefresh import st_autorefresh
 
 # --- Configuración de página ---
@@ -41,63 +40,28 @@ conteo["Porcentaje"] = ((conteo["Cantidad"] / conteo["Cantidad"].sum()) * 100).r
 ganador = conteo.iloc[0]["Respuesta"]
 st.markdown(f"<h2 style='text-align: center; color: #E74C3C;'>Gana el candidato {ganador}</h2>", unsafe_allow_html=True)
 
-# --- Layout: Tabla, barras de progreso y gráfico ---
-col1, col2 = st.columns([1, 2])
+# --- Barras de progreso por candidato ---
+st.subheader("📊 Barras de progreso por candidato")
+for idx, row in conteo.iterrows():
+    nombre = row["Respuesta"]
+    porcentaje = row["Porcentaje"]
 
-with col1:
-    st.subheader("📌 Resultados por respuesta")
-    st.dataframe(conteo.style.background_gradient(cmap='Blues', subset=['Cantidad']))
+    # Colores por candidato
+    if nombre.lower() == "tuto":
+        color = "linear-gradient(to right, #E74C3C 0%, #3498DB 100%)"  # rojo → azul
+    elif nombre.lower() == "rodrigo":
+        color = "linear-gradient(to right, #E74C3C 0%, #ffffff 50%, #2ECC71 100%)"  # rojo → blanco → verde
+    else:
+        color = "#95A5A6"  # gris neutro
 
-    st.subheader("📊 Barras de progreso por candidato")
-    for idx, row in conteo.iterrows():
-        nombre = row["Respuesta"]
-        porcentaje = row["Porcentaje"]
-
-        # Colores por candidato
-        if nombre.lower() == "tuto":
-            color = "linear-gradient(to right, #E74C3C 0%, #3498DB 100%)"  # rojo → azul
-        elif nombre.lower() == "rodrigo":
-            color = "linear-gradient(to right, #E74C3C 0%, #ffffff 50%, #2ECC71 100%)"  # rojo → blanco → verde
-        else:
-            color = "#95A5A6"  # gris neutro
-
-        st.markdown(f"""
-            <div style="margin-bottom: 10px;">
-                <strong>{nombre} ({porcentaje}%)</strong>
-                <div style="background-color: #e0e0e0; border-radius: 5px; width: 100%; height: 25px;">
-                    <div style="width: {porcentaje}%; height: 25px; background: {color}; border-radius: 5px;"></div>
-                </div>
+    st.markdown(f"""
+        <div style="margin-bottom: 10px;">
+            <strong>{nombre} ({porcentaje}%)</strong>
+            <div style="background-color: #e0e0e0; border-radius: 5px; width: 100%; height: 25px;">
+                <div style="width: {porcentaje}%; height: 25px; background: {color}; border-radius: 5px;"></div>
             </div>
-            """, unsafe_allow_html=True)
-
-with col2:
-    st.subheader("📊 Gráfico de barras")
-    
-    # Colores para matplotlib por candidato
-    colores = []
-    for nombre in conteo["Respuesta"]:
-        if nombre.lower() == "tuto":
-            colores.append("#E74C3C")  # rojo
-        elif nombre.lower() == "rodrigo":
-            colores.append("#2ECC71")  # verde
-        else:
-            colores.append("#3498DB")  # azul
-
-    # Crear gráfico
-    fig, ax = plt.subplots(figsize=(8,5))
-    bars = ax.bar(conteo["Respuesta"], conteo["Cantidad"], color=colores, edgecolor="black")
-    ax.set_ylabel("Cantidad de votos")
-    ax.set_xlabel("Candidatos")
-    ax.set_title("Resultados de la encuesta")
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-
-    # Mostrar valor encima de cada barra
-    for idx, row in conteo.iterrows():
-        ax.text(idx, row["Cantidad"] + 0.5, f'{int(row["Cantidad"])}', ha='center', va='bottom', fontsize=10)
-
-    st.pyplot(fig)
+        </div>
+        """, unsafe_allow_html=True)
 
 # --- Última actualización ---
-st.markdown(f"<p style='text-align: center; color: gray;'>Última actualización: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}</p>", unsafe_allow_html=True)
-
+st.markdown(f"<p style='text-align: center; color: gray;'>Última actualización: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}</p>", unsafe_allow_htm
