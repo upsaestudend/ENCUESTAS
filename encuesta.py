@@ -6,14 +6,17 @@ from streamlit_autorefresh import st_autorefresh
 # --- Configuración de página ---
 st.set_page_config(page_title="Resultados de la encuesta", page_icon="🗳️", layout="wide")
 
-# --- Refrescar cada 10 segundos automáticamente ---
+# --- Refresco automático cada 10 segundos ---
 st_autorefresh(interval=10000, key="refresh")
 
-# --- Encabezado ---
+# --- Título y subtítulo ---
 st.markdown("""
     <h1 style='text-align: center; color: #2E86C1;'>Resultados de la encuesta</h1>
     <h3 style='text-align: center; color: #34495E;'>¿Si las elecciones de segunda vuelta fueran mañana, por quien votarías?</h3>
 """, unsafe_allow_html=True)
+
+# --- Imagen de los candidatos debajo de la pregunta ---
+st.image("candidatos.jpeg", caption="Candidatos", use_column_width=True)
 
 # --- URL del CSV del Google Form ---
 url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1PL0i07Sl2mYrX3z3fxYwvjGw1za3ICLk09nlpqDDzgl-PffuC0NuT1_4xro8ADCQSrAUBlqdhHal/pub?output=csv"
@@ -53,36 +56,4 @@ with col1:
         # Colores por candidato
         if nombre.lower() == "tuto":
             color = "linear-gradient(to right, #E74C3C 0%, #3498DB 100%)"  # rojo → azul
-        elif nombre.lower() == "rodrigo":
-            color = "linear-gradient(to right, #E74C3C 0%, #ffffff 50%, #2ECC71 100%)"  # rojo → blanco → verde
-        else:
-            color = "#95A5A6"  # gris neutro
-
-        st.markdown(f"""
-            <div style="margin-bottom: 10px;">
-                <strong>{nombre} ({porcentaje}%)</strong>
-                <div style="background-color: #e0e0e0; border-radius: 5px; width: 100%; height: 25px;">
-                    <div style="width: {porcentaje}%; height: 25px; background: {color}; border-radius: 5px;"></div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-with col2:
-    st.subheader("📊 Gráfico de barras")
-    fig, ax = plt.subplots(figsize=(8, 5))
-    bars = ax.bar(conteo["Respuesta"], conteo["Cantidad"], color="#3498DB", edgecolor="#1F618D")
-    ax.set_ylabel("Cantidad de votos")
-    ax.set_xlabel("Respuestas")
-    ax.set_title("Resultados de la encuesta")
-    plt.xticks(rotation=45)
-
-    # Mostrar valor de cada barra
-    for bar in bars:
-        height = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2., height + 0.5, f'{int(height)}', ha='center', va='bottom', fontsize=10)
-
-    st.pyplot(fig)
-
-# --- Última actualización ---
-st.markdown(f"<p style='text-align: center; color: gray;'>Última actualización: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}</p>", unsafe_allow_html=True)
 
