@@ -44,6 +44,7 @@ st.markdown(f"<h2 style='text-align: center; color: #E74C3C;'>Gana el candidato 
 st.subheader("📊 Barras de progreso por candidato")
 for idx, row in conteo.iterrows():
     nombre = row["Respuesta"]
+    cantidad = row["Cantidad"]
     porcentaje = row["Porcentaje"]
 
     # Colores por candidato
@@ -56,7 +57,7 @@ for idx, row in conteo.iterrows():
 
     st.markdown(f"""
         <div style="margin-bottom: 10px;">
-            <strong>{nombre} ({porcentaje}%)</strong>
+            <strong>{nombre} ({cantidad} votos - {porcentaje}%)</strong>
             <div style="background-color: #e0e0e0; border-radius: 5px; width: 100%; height: 25px;">
                 <div style="width: {porcentaje}%; height: 25px; background: {color}; border-radius: 5px;"></div>
             </div>
