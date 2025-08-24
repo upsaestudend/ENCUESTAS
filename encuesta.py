@@ -42,4 +42,29 @@ st.markdown(f"<h2 style='text-align: center; color: #E74C3C;'>Gana el candidato 
 
 # --- Barras de progreso por candidato ---
 st.subheader("📊 Barras de progreso por candidato")
-for idx, row in conte
+for idx, row in conteo.iterrows():
+    nombre = row["Respuesta"]
+    porcentaje = row["Porcentaje"]
+
+    # Colores por candidato
+    if nombre.lower() == "tuto":
+        color = "linear-gradient(to right, #E74C3C 0%, #3498DB 100%)"  # rojo → azul
+    elif nombre.lower() == "rodrigo":
+        color = "linear-gradient(to right, #E74C3C 0%, #ffffff 50%, #2ECC71 100%)"  # rojo → blanco → verde
+    else:
+        color = "#95A5A6"  # gris neutro
+
+    st.markdown(f"""
+        <div style="margin-bottom: 10px;">
+            <strong>{nombre} ({porcentaje}%)</strong>
+            <div style="background-color: #e0e0e0; border-radius: 5px; width: 100%; height: 25px;">
+                <div style="width: {porcentaje}%; height: 25px; background: {color}; border-radius: 5px;"></div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+# --- Última actualización ---
+st.markdown(
+    f"<p style='text-align: center; color: gray;'>Última actualización: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}</p>",
+    unsafe_allow_html=True
+)
