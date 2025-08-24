@@ -3,33 +3,33 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from streamlit_autorefresh import st_autorefresh
 
-# --- Refrescar cada 10 segundos ---
+# --- Refrescar cada 10 segundos automáticamente ---
 st_autorefresh(interval=10000, key="refresh")
 
-# --- Título ---
-st.title("📊 Resultados del Formulario (actualización automática cada 10s)")
+# --- Título y subtítulo ---
+st.title("Resultados de la encuesta (actualización automática cada 10s)")
+st.subheader("¿Si las elecciones de segunda vuelta fueran mañana, por quien votarías?")
 
 # --- URL del CSV del Google Form ---
 url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1PL0i07Sl2mYrX3z3fxYwvjGw1za3ICLk09nlpqDDzgl-PffuC0NuT1_4xro8ADCQSrAUBlqdhHal/pub?output=csv"
 
-# --- Cargar datos ---
-try:
+# --- Botón de actualización manual ---
+if st.button("🔄 Actualizar resultados"):
     df = pd.read_csv(url)
-except Exception as e:
-    st.error(f"No se pudo cargar el CSV: {e}")
-    st.stop()
+else:
+    df = pd.read_csv(url)
 
-# --- Vista previa de los datos ---
-with st.expander("👀 Ver datos originales"):
-    st.dataframe(df)
-
-# --- Columna de respuestas (ajustar según el formulario) ---
+# --- Columna de respuestas (ajusta según tu formulario) ---
 col_respuesta = df.columns[1]
 
 # --- Conteo y porcentajes ---
 conteo = df[col_respuesta].value_counts().reset_index()
 conteo.columns = ["Respuesta", "Cantidad"]
 conteo["Porcentaje"] = (conteo["Cantidad"] / conteo["Cantidad"].sum()) * 100
+
+# --- Mostrar quién va ganando ---
+ganador = conteo.iloc[0]["Respuesta"]
+st.markdown(f"**Gana el candidato {ganador}**")
 
 # --- Tabla de resultados ---
 st.subheader("📌 Resultados por respuesta")
@@ -41,7 +41,7 @@ fig, ax = plt.subplots(figsize=(8, 5))
 ax.bar(conteo["Respuesta"], conteo["Cantidad"], color="skyblue", edgecolor="black")
 ax.set_ylabel("Cantidad de votos")
 ax.set_xlabel("Respuestas")
-ax.set_title("Resultados del Formulario")
+ax.set_title("Resultados de la encuesta")
 plt.xticks(rotation=45)
 st.pyplot(fig)
 
